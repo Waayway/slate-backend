@@ -1,0 +1,20 @@
+version: "3.7"
+
+services:
+  slate-backend:
+    image: slate-backend
+    build:
+      context: .
+      dockerfile: "./Dockerfile"
+    volumes:
+      - slatedata:/app/data
+    ports:
+      - "8080:8080"
+
+volumes:
+  slatedata:
+
+networks:
+  default:
+    external:
+      name: aqua

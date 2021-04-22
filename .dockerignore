@@ -1,0 +1,4 @@
+env
+__pycache__
+auth/__pycache__
+db/__pycache__
