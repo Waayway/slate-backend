@@ -42,7 +42,6 @@ def addPostRequests(app: FastAPI):
     @app.post('/parents', response_model=schemas.Parent)
     async def create_parent(parent: schemas.ParentCreate,
                             user=Depends(auth.get_current_user)):
-        print(parent)
         parent.owner_id = user.id
         parent_obj = crud.create_parent(db, parent)
         return parent_obj
@@ -104,7 +103,6 @@ def addPostRequests(app: FastAPI):
                                                 1).first()
         parent_sql = db.query(models.ParentNote).filter(
             models.ParentNote.id == link.parentid).first()
-        print(note_sql, parent_sql)
         if (note_sql.owner_id != user.id or parent_sql.owner_id != user.id):
             return Response("Not authenticated",
                             status_code=status.HTTP_401_UNAUTHORIZED)

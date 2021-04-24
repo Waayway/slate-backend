@@ -47,6 +47,7 @@ class ParentCreate(ParentBase):
 
 
 class Parent(ParentBase):
+    owner_id: str
     id: int
     childs: List[Note] = None
 
