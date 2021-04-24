@@ -84,6 +84,8 @@ class ChangeUser(BaseModel):
 class ChangeParent(BaseModel):
     name: Optional[str]
     content: Optional[str]
+    permission: Optional[str]
+    updatedate: Optional[date]
 
 
 class ChangeNote(BaseModel):

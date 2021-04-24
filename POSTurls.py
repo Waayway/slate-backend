@@ -47,14 +47,24 @@ def addPostRequests(app: FastAPI):
         parent_obj = crud.create_parent(db, parent)
         return parent_obj
 
-    @app.post('/parents/change/{id}', response_model=schemas.Parent)
-    async def change_parent(id, ChangeParent: schemas.ChangeParent):
+    @app.post('/parent/change/{id}', response_model=schemas.Parent)
+    async def change_parent(id,
+                            ChangeParent: schemas.ChangeParent,
+                            user=Depends(auth.get_current_user)):
+        # parent_sql = crud.get_parent(db, id)
         parent_sql = db.query(
             models.ParentNote).filter(models.ParentNote.id == id).first()
+        if parent_sql.owner_id != user.id:
+            return Response("Not authenticated",
+                            status_code=status.HTTP_401_UNAUTHORIZED)
         if ChangeParent.name:
             parent_sql.name = ChangeParent.name
         if ChangeParent.content:
-            parent_sql = ChangeParent.content
+            parent_sql.content = ChangeParent.content
+        if ChangeParent.permission:
+            parent_sql.permission = ChangeParent.permission
+        if ChangeParent.updatedate:
+            parent_sql.updatedate = ChangeParent.updatedate
         db.commit()
         db.refresh(parent_sql)
         return schemas.Parent.from_orm(parent_sql)
