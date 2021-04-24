@@ -34,7 +34,7 @@ class ParentNote(Base):
     createdate = Column(Date)
     updatedate = Column(Date)
     owner_id = Column(String, ForeignKey("users.id"))
-    child_ids = Column(Integer, ForeignKey("notes.id"))
+    # child_ids = Column(Integer, ForeignKey("notes.id"))
 
     childs = relationship("Note")
     owner = relationship("User", back_populates="parents")
@@ -51,7 +51,7 @@ class Note(Base):
     createdate = Column(Date)
     updatedate = Column(Date)
     owner_id = Column(String, ForeignKey("users.id"))
-    # parent_id = Column(Integer, ForeignKey("parents.id"))
+    parent_id = Column(Integer, ForeignKey("parents.id"))
 
     owner = relationship("User", back_populates="notes")
     # parent = relationship("ParentNote", back_populates="childs")

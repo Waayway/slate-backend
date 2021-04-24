@@ -1,5 +1,6 @@
 # pylint: disable=no-name-in-module
 # pylint: disable=no-self-argument
+from db.database import Base
 from typing import List, Optional
 from datetime import date
 
@@ -90,3 +91,8 @@ class ChangeNote(BaseModel):
     content: Optional[str]
     permission: Optional[str]
     updatedate: Optional[date]
+
+
+class LinkParentToNote(BaseModel):
+    parentid: int
+    noteid: int

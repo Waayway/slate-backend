@@ -1,6 +1,7 @@
 from datetime import date
+from fastapi.openapi.models import OperationWithCallbacks
 from pydantic.schema import schema
-from starlette.status import HTTP_401_UNAUTHORIZED
+from starlette.status import HTTP_202_ACCEPTED, HTTP_401_UNAUTHORIZED
 import auth
 from fastapi.applications import FastAPI
 from fastapi.param_functions import Depends
@@ -41,6 +42,7 @@ def addPostRequests(app: FastAPI):
     @app.post('/parents', response_model=schemas.Parent)
     async def create_parent(parent: schemas.ParentCreate,
                             user=Depends(auth.get_current_user)):
+        print(parent)
         parent.owner_id = user.id
         parent_obj = crud.create_parent(db, parent)
         return parent_obj
@@ -83,3 +85,22 @@ def addPostRequests(app: FastAPI):
         db.commit()
         db.refresh(note_sql)
         return schemas.Note.from_orm(note_sql)
+
+    @app.post('/notes/link')
+    @app.post('/parents/link')
+    def link_parent_and_note(link: schemas.LinkParentToNote,
+                             user=Depends(auth.get_current_user)):
+        note_sql = db.query(models.Note).filter(models.Note.id == link.noteid +
+                                                1).first()
+        parent_sql = db.query(models.ParentNote).filter(
+            models.ParentNote.id == link.parentid).first()
+        print(note_sql, parent_sql)
+        if (note_sql.owner_id != user.id or parent_sql.owner_id != user.id):
+            return Response("Not authenticated",
+                            status_code=status.HTTP_401_UNAUTHORIZED)
+        if (note_sql.parent_id == parent_sql.id):
+            note_sql.parent_id = None
+        else:
+            note_sql.parent_id = parent_sql.id
+        db.commit()
+        return Response("OK", status_code=status.HTTP_202_ACCEPTED)
