@@ -12,13 +12,13 @@ class NoteBase(BaseModel):
     name: str
     type: str
     content: str
-    permission: str
     createdate: date
     updatedate: date
 
 
 class NoteCreate(NoteBase):
     owner_id: Optional[str]
+    permission: Optional[str]
 
 
 class Note(NoteBase):
@@ -56,7 +56,6 @@ class UserBase(BaseModel):
     username: Optional[str]
     email: Optional[str]
     full_name: Optional[str]
-    permissions: str = "[]"
 
     class Config:
         orm_mode = True
@@ -64,6 +63,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    permissions: str = "[]"
 
 
 class User(UserBase):

@@ -2,7 +2,7 @@ from datetime import date
 from fastapi.openapi.models import OperationWithCallbacks
 from pydantic.schema import schema
 from starlette.status import HTTP_202_ACCEPTED, HTTP_401_UNAUTHORIZED
-import auth
+import auth, uuid
 from fastapi.applications import FastAPI
 from fastapi.param_functions import Depends
 from sqlalchemy.orm.session import Session
@@ -71,6 +71,8 @@ def addPostRequests(app: FastAPI):
     @app.post('/notes', response_model=schemas.Note)
     async def create_note(note: schemas.NoteCreate,
                           user=Depends(auth.get_current_user)):
+
+        note.permission = str(uuid.uuid4())
         note.owner_id = user.id
         note_obj = crud.create_note(db, note)
         return note_obj
@@ -112,3 +114,10 @@ def addPostRequests(app: FastAPI):
             note_sql.parent_id = parent_sql.id
         db.commit()
         return Response("OK", status_code=status.HTTP_202_ACCEPTED)
+
+    @app.post('/notes/getpermission/{uuid}')
+    def get_permission_note(uuid, user=Depends(auth.get_current_user)):
+        user_sql = db.query(
+            models.User).filter(models.User.id == user.id).first()
+        print(user_sql.permissions)
+        return Response("OK", status_code=status.HTTP_200_OK)

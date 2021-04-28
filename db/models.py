@@ -1,6 +1,8 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date
 from sqlalchemy.orm import relationship
 import uuid
+
+from sqlalchemy.sql.expression import true
 from .database import Base
 
 
@@ -12,7 +14,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(String, primary_key=True, index=True, default=uuid_gen)
-    username = Column(String, index=True)
+    username = Column(String, index=True, unique=True)
     email = Column(String, index=True)
     password = Column(String)
     permissions = Column(String)  # AS JSON ARRAY
