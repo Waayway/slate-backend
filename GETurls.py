@@ -1,4 +1,5 @@
 from os import stat
+from sqlalchemy.sql.sqltypes import JSON
 from starlette.responses import Response
 from starlette.status import HTTP_401_UNAUTHORIZED
 import auth
@@ -7,7 +8,7 @@ from fastapi import status, FastAPI
 from fastapi.param_functions import Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm.session import Session
-from db import crud, get_db
+from db import crud, get_db, models, schemas
 import json
 
 db = get_db()
@@ -38,13 +39,18 @@ def addGetRequests(app: FastAPI):
     def get_parent_by_id(id: int, user=Depends(auth.get_current_user)):
         parent = crud.get_parent(db, id)
         if parent:
-            if (parent.owner_id != user.id):
+            user_sql = db.query(
+                models.User).filter(models.User.id == user.id).first()
+            print()
+            if (parent.owner_id != user.id
+                    and parent.permission not in user_sql.permissions):
                 return Response("Not authenticated",
                                 status_code=status.HTTP_401_UNAUTHORIZED)
             return JSONResponse(
                 {
                     "data": json.loads(parent.json()),
-                    "message": "OK"
+                    "message": "OK",
+                    "edit": parent.owner_id == user.id
                 },
                 status_code=status.HTTP_302_FOUND)
         else:
@@ -68,18 +74,38 @@ def addGetRequests(app: FastAPI):
             return JSONResponse(status_code=status.HTTP_404_NOT_FOUND,
                                 content="None")
 
+    @app.get('/parent/permission', response_model=schemas.ReturnLinkedParents)
+    def get_parent_based_on_permission(user=Depends(auth.get_current_user)):
+        user_sql = db.query(
+            models.User).filter(models.User.id == user.id).first()
+        parents = []
+        permissions = json.loads(user_sql.permissions)
+        for i in permissions:
+            parents.append(
+                schemas.Parent.from_orm(
+                    db.query(models.ParentNote).filter(
+                        models.ParentNote.permission == i).first()))
+        if parents == []:
+            return JSONResponse({"message": "Nothing found"},
+                                status_code=status.HTTP_404_NOT_FOUND)
+        return {"data": parents}
+
     @app.get("/notes/id/{id}")
     def get_note_by_id(id: int, user=Depends(auth.get_current_user)):
         note = crud.get_note(db, id)
-        print(note)
         if note:
-            if (note.owner_id != user.id):
+            user_sql = db.query(
+                models.User).filter(models.User.id == user.id).first()
+            parent = crud.get_parent(db, note.parent_id)
+            if (note.owner_id != user.id
+                    and parent.permission not in user_sql.permissions):
                 return Response("Not authenticated",
                                 status_code=status.HTTP_401_UNAUTHORIZED)
             return JSONResponse(
                 {
                     "data": json.loads(note.json()),
-                    "message": "OK"
+                    "message": "OK",
+                    "edit": note.owner_id == user.id
                 },
                 status_code=status.HTTP_302_FOUND)
         else:

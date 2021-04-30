@@ -99,3 +99,7 @@ class ChangeNote(BaseModel):
 class LinkParentToNote(BaseModel):
     parentid: int
     noteid: int
+
+
+class ReturnLinkedParents(BaseModel):
+    data: List[Parent]

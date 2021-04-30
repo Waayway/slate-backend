@@ -2,7 +2,7 @@ from datetime import date
 from fastapi.openapi.models import OperationWithCallbacks
 from pydantic.schema import schema
 from starlette.status import HTTP_202_ACCEPTED, HTTP_401_UNAUTHORIZED
-import auth, uuid
+import auth, uuid, json
 from fastapi.applications import FastAPI
 from fastapi.param_functions import Depends
 from sqlalchemy.orm.session import Session
@@ -43,6 +43,7 @@ def addPostRequests(app: FastAPI):
     async def create_parent(parent: schemas.ParentCreate,
                             user=Depends(auth.get_current_user)):
         parent.owner_id = user.id
+        parent.permission = str(uuid.uuid4())
         parent_obj = crud.create_parent(db, parent)
         return parent_obj
 
@@ -101,10 +102,11 @@ def addPostRequests(app: FastAPI):
     @app.post('/parents/link')
     def link_parent_and_note(link: schemas.LinkParentToNote,
                              user=Depends(auth.get_current_user)):
-        note_sql = db.query(models.Note).filter(models.Note.id == link.noteid +
-                                                1).first()
+        note_sql = db.query(
+            models.Note).filter(models.Note.id == link.noteid).first()
         parent_sql = db.query(models.ParentNote).filter(
             models.ParentNote.id == link.parentid).first()
+        print(parent_sql.owner_id, note_sql.owner_id, user.id)
         if (note_sql.owner_id != user.id or parent_sql.owner_id != user.id):
             return Response("Not authenticated",
                             status_code=status.HTTP_401_UNAUTHORIZED)
@@ -115,9 +117,20 @@ def addPostRequests(app: FastAPI):
         db.commit()
         return Response("OK", status_code=status.HTTP_202_ACCEPTED)
 
-    @app.post('/notes/getpermission/{uuid}')
-    def get_permission_note(uuid, user=Depends(auth.get_current_user)):
+    @app.post('/parents/getpermission/{uuid}')
+    def get_permission_parent(uuid, user=Depends(auth.get_current_user)):
         user_sql = db.query(
             models.User).filter(models.User.id == user.id).first()
-        print(user_sql.permissions)
+        note_sql = db.query(models.ParentNote).filter(
+            models.ParentNote.permission == uuid).first()
+        if not note_sql:
+            return Response("Category not found",
+                            status_code=status.HTTP_404_NOT_FOUND)
+        Json = json.loads(user_sql.permissions)
+        if uuid in Json:
+            Json.remove(uuid)
+        else:
+            Json.append(uuid)
+        user_sql.permissions = json.dumps(Json)
+        db.commit()
         return Response("OK", status_code=status.HTTP_200_OK)
