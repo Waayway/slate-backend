@@ -96,7 +96,8 @@ def addGetRequests(app: FastAPI):
         if note:
             user_sql = db.query(
                 models.User).filter(models.User.id == user.id).first()
-            parent = crud.get_parent(db, note.parent_id)
+            parent = db.query(models.ParentNote).filter(
+                models.ParentNote.id == note.parent_id).first()
             if (note.owner_id != user.id
                     and parent.permission not in user_sql.permissions):
                 return Response("Not authenticated",
