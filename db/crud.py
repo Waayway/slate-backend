@@ -42,7 +42,6 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 
 def create_user(db: Session, user: schemas.UserCreate):
     password = bcrypt.hash(str(user.password) + SECRET_KEY)
-    print(password, user.password)
     db_user = models.User(username=user.username,
                           email=user.email,
                           permissions=user.permissions,

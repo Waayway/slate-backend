@@ -41,7 +41,6 @@ def addGetRequests(app: FastAPI):
         if parent:
             user_sql = db.query(
                 models.User).filter(models.User.id == user.id).first()
-            print()
             if (parent.owner_id != user.id
                     and parent.permission not in user_sql.permissions):
                 return Response("Not authenticated",

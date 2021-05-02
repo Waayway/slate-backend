@@ -106,7 +106,6 @@ def addPostRequests(app: FastAPI):
             models.Note).filter(models.Note.id == link.noteid).first()
         parent_sql = db.query(models.ParentNote).filter(
             models.ParentNote.id == link.parentid).first()
-        print(parent_sql.owner_id, note_sql.owner_id, user.id)
         if (note_sql.owner_id != user.id or parent_sql.owner_id != user.id):
             return Response("Not authenticated",
                             status_code=status.HTTP_401_UNAUTHORIZED)

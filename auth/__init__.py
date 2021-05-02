@@ -57,6 +57,5 @@ def createUrls(app: FastAPI):
         userJSON = json.loads(user.json())
         del userJSON["image"]
         token = jwt.encode(userJSON, JWT_SECRET)
-        print(userJSON)
 
         return {'access_token': token, 'token_type': 'bearer'}
