@@ -1,13 +1,19 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-from db import get_db, crud
-import datetime
+from db import get_db
 import GETurls
 import POSTurls
 import DELETEurls
 from auth import createUrls
 import markdown
+import os
+
+# ### DEVELOPMENT, COMMENT IN ACTUAL USE
+# from dotenv import load_dotenv
+
+# load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
+# ### DEVELOPMENT COMMENT IN USE
 
 app = FastAPI()
 

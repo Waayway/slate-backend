@@ -55,7 +55,6 @@ class Parent(ParentBase):
 class UserBase(BaseModel):
     username: Optional[str]
     email: Optional[str]
-    full_name: Optional[str]
 
     class Config:
         orm_mode = True
@@ -77,7 +76,6 @@ class User(UserBase):
 class ChangeUser(BaseModel):
     username: Optional[str]
     email: Optional[str]
-    full_name: Optional[str]
     image: Optional[str]
     permissions: Optional[str] = "[]"
 

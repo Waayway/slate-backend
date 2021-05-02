@@ -1,10 +1,12 @@
-import pydantic
+import pydantic, os
 from pydantic.error_wrappers import ValidationError
 from pydantic.schema import schema
 from sqlalchemy.orm import Session
 from passlib.hash import bcrypt
 
 from . import models, schemas
+
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 
 def get_user(db: Session, user_id: str):
@@ -39,7 +41,8 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 
 
 def create_user(db: Session, user: schemas.UserCreate):
-    password = bcrypt.hash(user.password)
+    password = bcrypt.hash(str(user.password) + SECRET_KEY)
+    print(password, user.password)
     db_user = models.User(username=user.username,
                           email=user.email,
                           permissions=user.permissions,

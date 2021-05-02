@@ -2,19 +2,21 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.hash import bcrypt
 from sqlalchemy.orm.session import Session
-from starlette.status import HTTP_401_UNAUTHORIZED
 from db import crud, schemas, get_db
 import jwt
 import json
+import os
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
-JWT_SECRET = "03635c560f20"
+JWT_SECRET = os.getenv("JWT_SECRET")
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 db = get_db()
 
 
 def verify_password(password, password_hash):
+    password = str(password) + SECRET_KEY
     return bcrypt.verify(password, password_hash)
 
 
@@ -39,6 +41,12 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
 
 def createUrls(app: FastAPI):
+    #Get logged in user
+    @app.get('/users/me', response_model=schemas.User)
+    async def get_myself(user: str = Depends(get_current_user)):
+        return user
+
+    # Custom OAuth
     @app.post('/login')
     async def generate_token(form_data: OAuth2PasswordRequestForm = Depends()):
         user = authenticate_user(form_data.username, form_data.password, db)
@@ -49,9 +57,6 @@ def createUrls(app: FastAPI):
         userJSON = json.loads(user.json())
         del userJSON["image"]
         token = jwt.encode(userJSON, JWT_SECRET)
+        print(userJSON)
 
         return {'access_token': token, 'token_type': 'bearer'}
-
-    @app.get('/users/me', response_model=schemas.User)
-    async def get_myself(user: str = Depends(get_current_user)):
-        return user
