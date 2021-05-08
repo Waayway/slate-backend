@@ -78,3 +78,15 @@ I tried focussing on D&D note taking but haven't found a way yet to do this.
 `/notes/change` Change a Note only name, type, content. And updatedate will be updated automatically
 
 `/notes/link` See `/parent/link`
+
+In this folder there's an .env file, the info in it is:
+
+```env
+SECRET_KEY="CHANGEME"
+JWT_SECRET="CHANGEME"
+# DB
+DB_URL="sqlite:///./data/db.sqlite3"
+# DB_URL = "postgresql://user:password@postgresserver/db"
+```
+
+To use see DB_URL see sqlalchemy documentation
