@@ -19,7 +19,7 @@ class User(Base):
     password = Column(String)
     permissions = Column(String)  # AS JSON ARRAY
     image = Column(String)  # BASE64 IMAGE
-    friend_ids = Column(Integer, ForeignKey("users.id"))
+    friend_ids = Column(String, ForeignKey("users.id"))
 
     notes = relationship("Note", back_populates="owner")
     parents = relationship("ParentNote", back_populates="owner")

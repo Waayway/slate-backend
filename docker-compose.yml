@@ -1,13 +1,23 @@
 version: "3.7"
 
 services:
+  database:
+    image: "postgres"
+    env_file: 
+      - database.env
+    volumes:
+      - slatedata:/var/lib/postgresql/data/
+    ports: 
+      - "5432:5432"
   slate-backend:
     image: slate-backend
+    depends_on: 
+      - database
     build:
       context: .
       dockerfile: "./Dockerfile"
-    volumes:
-      - slatedata:/app/data
+    # volumes:
+    #   - slatedata:/app/data
     ports:
       - "8080:8080"
     env_file: 
