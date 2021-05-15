@@ -33,8 +33,6 @@ def addPostRequests(app: FastAPI):
             user_sql.image = ChangeUser.image
         if ChangeUser.permissions:
             user_sql.permissions = ChangeUser.permissions
-        if ChangeUser.full_name:
-            user_sql.permissions = ChangeUser.full_name
         db.commit()
         db.refresh(user_sql)
         return schemas.User.from_orm(user_sql)
